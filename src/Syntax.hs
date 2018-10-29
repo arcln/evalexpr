@@ -54,6 +54,21 @@ pNumber = do
 pBreak :: Parser String
 pBreak = (pString "break") <|> (pString ";")
 
+pStrongOp :: Parser Char
+pStrongOp = pChar '*' <|> pChar '/'
+
+pWeakOp :: Parser Char
+pWeakOp = pChar '+' <|> pChar '-'
+
+pOpen :: Parser Char
+pOpen = pChar '('
+
+pClose :: Parser Char
+pClose = pChar ')'
+
+pOp :: Parser Char
+pOp = pWeakOp <|> pStrongOp
+
 -- let number      = exp('number', /[0-9]*/);
 -- let strongOp    = exp('strongOp', /[*|/]/);
 -- let weakOp      = exp('weakOp', /\+|-/);
