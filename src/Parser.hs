@@ -22,7 +22,10 @@ instance Monad Parser where
   return = returnParser
   (>>=) = bindParser
 
--- fmapParser :: undefined
+fmapParser :: (a -> b) -> Parser a -> Parser b
+fmapParser f x = do
+  x' <- x
+  return $ f x'
 
 sequentialParser :: Parser (a -> b) -> Parser a -> Parser b
 sequentialParser f x = do
@@ -82,15 +85,10 @@ pString (x:xs) = do
 
 pNumber :: Parser Integer
 pNumber = do
-  x <- pMany pDigit
-  return $ foldr (\x y -> y * 10 + x) 0 x
-
--- pNumber :: Parser Integer
--- pNumber = do
---     x <- pDigit
---     xs <- pNumber
---     return $ (toInteger $ digitToInt x) * 10 + xs
-
+  x <- pDigit
+  xs <- pNumber <|> pure 0
+  return (x + xs * 10)
+  
 pBreak :: Parser String
 pBreak = (pString "break") <|> (pString ";")
 
