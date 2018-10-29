@@ -1,0 +1,43 @@
+name:                evalexpr
+version:             0.1.0.0
+github:              "paullaffitte/evalexpr"
+license:             MIT
+author:              "Paul Laffitte"
+maintainer:          "paul.laffitte@epitech.eu"
+copyright:           "2018 Paul Laffitte"
+
+dependencies:
+- base >= 4.7 && < 5
+
+extra-source-files:
+- README.md
+
+description:         Please see the README on GitHub at <https://github.com/paullaffitte/evalexpr#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+
+executables:
+  evalexpr-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - evalexpr
+
+tests:
+  evalexpr-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - evalexpr
