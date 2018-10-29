@@ -1,6 +1,5 @@
 module Parser where
 
-import Data.Char
 import Control.Applicative
 
 newtype Parser a = Parser
@@ -12,11 +11,11 @@ instance Functor Parser where
 
 instance Applicative Parser where
   pure = returnParser
-  (<*>) = sequentialParser
+  (<*>) = sequentialParser -- Not sure about the name, if you know better, change it
 
 instance Alternative Parser where
   empty = emptyParser
-  (<|>) = pipeParser
+  (<|>) = pipeParser -- Not sure about the name, if you know better, change it
 
 instance Monad Parser where
   return = returnParser
@@ -53,57 +52,3 @@ bindParser x f = Parser $ \str -> let (e, str1) = runParser x str
       in case e' of
         Left msg' -> (Left msg', str)
         Right v' -> (Right v', str2)
-
-pStatisfy :: (Char -> Bool) -> Parser Char
-pStatisfy predicat = Parser func
-  where
-    func :: String -> (Either String Char, String)
-    func [] = (Left "Empty string", "")
-    func (x:xs) = if (predicat x) then (Right x, xs) else (Left "Unsatisfied char", x:xs)
-
-pChar :: Char -> Parser Char
-pChar c = pStatisfy (== c)
-
-pMany :: Parser a -> Parser [a]
-pMany x = many_x
-  where
-    many_x = some_x <|> pure []
-    some_x = (:) <$> x <*> many_x
-
-pCharOf :: String -> Parser Char
-pCharOf cs = pStatisfy $ \c -> elem c cs
-
-pDigit :: Parser Integer
-pDigit = toInteger . digitToInt <$> pCharOf ['0'..'9']
-
-pString :: String -> Parser String
-pString [] = return []
-pString (x:xs) = do
-  x' <- pChar x
-  xs' <- pString xs
-  return (x':xs')
-
-pNumber :: Parser Integer
-pNumber = do
-  x <- pDigit
-  xs <- pNumber <|> pure 0
-  return (x + xs * 10)
-  
-pBreak :: Parser String
-pBreak = (pString "break") <|> (pString ";")
-
--- let number      = exp('number', /[0-9]*/);
--- let strongOp    = exp('strongOp', /[*|/]/);
--- let weakOp      = exp('weakOp', /\+|-/);
-
--- let popen       = exp('popen', /\(/);
--- let pclose      = exp('pclose', /\)/);
-
--- let op          = exp('op', or(strongOp, weakOp));
--- let value       = exp('value', and(maybe(weakOp), number));
-
--- let func        = exp('func');
--- let pexpr       = exp('pexpr');
--- let expr        = exp('expr', and(or(value, pexpr), variadic(func)));
--- func.value      = and(op, expr);
--- pexpr.value     = and(maybe(weakOp), popen, expr, pclose);
