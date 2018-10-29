@@ -24,16 +24,13 @@ returnParser :: a -> Parser a
 returnParser x = Parser $ \str -> (Right x, str)
 
 bindParser :: Parser a -> (a -> Parser b) -> Parser b
-bindParser x f = Parser func
-  where
-    func :: String -> (Either String b, String)
-    func str = let (e, str1) = runParser x str
-      in case e of
-          Left msg -> (Left msg, str)
-          Right v -> let (e', str') = runParser (f v) str'
-            in case e' of
-              Left msg' -> (Left msg', str)
-              Right v' -> (Left "", str')
+bindParser x f = Parser $ \str -> let (e, str1) = runParser x str
+  in case e of
+    Left msg -> (Left msg, str)
+    Right v -> let (e', str2) = runParser (f v) str1
+      in case e' of
+        Left msg' -> (Left msg', str)
+        Right v' -> (Right v', str2)
 
 pStatisfy :: (Char -> Bool) -> Parser Char
 pStatisfy predicat = Parser func
@@ -52,5 +49,5 @@ pString (x:xs) = do
   xs' <- pString xs
   return (x':xs')
 
-pBreakk :: Parser String
-pBreakk = pString "break"
+pBreak :: Parser String
+pBreak = pString "break"

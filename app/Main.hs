@@ -9,6 +9,7 @@ main = do
         Left a' -> a'
         Right a' -> a' : ('-' : b)
 
-    let (a', b') = runParser (pString "br") "break"
-    print a'
-    print b'
+    let (a2, b2) = runParser pBreak "break;"
+    print $ case a2 of
+        Left a2' -> a2'
+        Right a2' -> a2' ++ " - " ++ b2
