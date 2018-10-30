@@ -7,7 +7,7 @@ module Syntax
     , pCharOf
     , pString
     , pNumber
-    , pBreak
+    , pValue
     ) where
 
 import Parser
@@ -21,16 +21,22 @@ pStatisfy predicat = Parser func
     func [] = (Left "Empty string", "")
     func (x:xs) = if (predicat x) then (Right x, xs) else (Left "Unsatisfied char", x:xs)
 
+pNothing :: Parser (Maybe a)
+pNothing = Parser func
+  where
+    func :: String -> (Either String (Maybe a), String)
+    func xs = (Right Nothing, xs)
+
 pChar :: Char -> Parser Char
 pChar c = pStatisfy (== c)
 
 -- One or more
 pSome :: Parser a -> Parser [a]
-pSome x = (:) <$> x <*> (pMany x)
+pSome = some
 
 -- Zéro or more
 pMany :: Parser a -> Parser [a]
-pMany x = (pSome x) <|> pure []
+pMany = many
 
 pCharOf :: String -> Parser Char
 pCharOf cs = pStatisfy $ \c -> elem c cs
@@ -50,9 +56,6 @@ pNumber = do
   x <- pDigit
   xs <- pNumber <|> pure 0
   return (x + xs * 10)
-  
-pBreak :: Parser String
-pBreak = (pString "break") <|> (pString ";")
 
 pStrongOp :: Parser Char
 pStrongOp = pChar '*' <|> pChar '/'
@@ -69,12 +72,22 @@ pClose = pChar ')'
 pOp :: Parser Char
 pOp = pWeakOp <|> pStrongOp
 
--- let number      = exp('number', /[0-9]*/);
--- let strongOp    = exp('strongOp', /[*|/]/);
--- let weakOp      = exp('weakOp', /\+|-/);
+pMaybe :: Parser a -> Parser (Maybe a)
+pMaybe = optional
 
--- let popen       = exp('popen', /\(/);
--- let pclose      = exp('pclose', /\)/);
+-- pAnd :: Parser a -> Parser b -> Parser c
+-- pAnd x y = do
+--   x' <- x
+--   y' <- y
+
+pValue :: Parser Integer
+pValue = do
+  x <- pMaybe pWeakOp
+  num <- pNumber
+  case x of
+    Just '-' -> return (- num)
+    Just '+' -> return num
+    Nothing -> pNumber
 
 -- let op          = exp('op', or(strongOp, weakOp));
 -- let value       = exp('value', and(maybe(weakOp), number));
