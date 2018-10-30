@@ -1,16 +1,17 @@
 module Syntax
-    ( runParser
-    , pStatisfy
-    , pChar
-    , pSome
-    , pMany
-    , pCharOf
-    , pString
-    , pNumber
-    , pValue
-    ) where
+  ( runParser
+  , pStatisfy
+  , pChar
+  , pSome
+  , pMany
+  , pCharOf
+  , pString
+  , pNumber
+  , pValue
+  ) where
 
 import Parser
+import Types
 import Control.Applicative
 import Data.Char
 
@@ -29,6 +30,12 @@ pNothing = Parser func
 
 pChar :: Char -> Parser Char
 pChar c = pStatisfy (== c)
+
+-- pOr :: Parser a -> Parser b -> Parser c
+-- pOr x y = do
+--   x' <- x
+--   y' <- y
+--   case y' of
 
 -- One or more
 pSome :: Parser a -> Parser [a]
@@ -75,24 +82,34 @@ pOp = pWeakOp <|> pStrongOp
 pMaybe :: Parser a -> Parser (Maybe a)
 pMaybe = optional
 
--- pAnd :: Parser a -> Parser b -> Parser c
--- pAnd x y = do
---   x' <- x
---   y' <- y
-
 pValue :: Parser Integer
 pValue = do
-  x <- pMaybe pWeakOp
+  sign <- pMaybe pWeakOp
   num <- pNumber
-  case x of
+  case sign of
     Just '-' -> return (- num)
     Just '+' -> return num
     Nothing -> pNumber
 
--- let op          = exp('op', or(strongOp, weakOp));
--- let value       = exp('value', and(maybe(weakOp), number));
+pFunc :: Parser FuncAst
+pFunc = do
+  op <- pOp
+  expr <- pExpr
+  return $ FuncAst op expr
 
--- let func        = exp('func');
+pExpr :: Parser ExprAst
+pExpr = do
+  header <- pOr pValue pPExpr
+  funcs <- pMany pFunc 
+  return $ ExprAst header funcs
+
+pPExpr :: Parser PExprAst
+pPExpr = do
+  sign <- pMaybe pWeakOp
+  expr <- (pChar '(') *> pExpr (<* pChar ')')
+  return $ PExprAst sign expr
+
+
 -- let pexpr       = exp('pexpr');
 -- let expr        = exp('expr', and(or(value, pexpr), variadic(func)));
 -- func.value      = and(op, expr);
