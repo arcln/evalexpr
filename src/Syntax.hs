@@ -35,10 +35,6 @@ pNothing = Parser func
 pChar :: Char -> Parser Char
 pChar c = pStatisfy (== c)
 
--- pOr :: Parser a -> Parser b -> Parser (a, b)
--- pOr x y = do
---   x <- pMany
-
 -- One or more
 pSome :: Parser a -> Parser [a]
 pSome = some
@@ -113,8 +109,3 @@ pEntry :: Parser ValueAst
 pEntry = do
   expr <- pExpr
   return $ Right expr
-
--- let pexpr       = exp('pexpr');
--- let expr        = exp('expr', and(or(value, pexpr), variadic(func)));
--- func.value      = and(op, expr);
--- pexpr.value     = and(maybe(weakOp), popen, expr, pclose);

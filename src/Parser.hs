@@ -11,11 +11,11 @@ instance Functor Parser where
 
 instance Applicative Parser where
   pure = returnParser
-  (<*>) = sequentialParser -- Not sure about the name, if you know better, change it
+  (<*>) = applyParser
 
 instance Alternative Parser where
   empty = emptyParser
-  (<|>) = pipeParser -- Not sure about the name, if you know better, change it
+  (<|>) = orParser
 
 instance Monad Parser where
   return = returnParser
@@ -26,8 +26,8 @@ fmapParser f x = do
   x' <- x
   return $ f x'
 
-sequentialParser :: Parser (a -> b) -> Parser a -> Parser b
-sequentialParser f x = do
+applyParser :: Parser (a -> b) -> Parser a -> Parser b
+applyParser f x = do
   f' <- f
   x' <- x
   return $ f' x'
@@ -35,8 +35,8 @@ sequentialParser f x = do
 emptyParser :: Parser a
 emptyParser = Parser $ \x -> (Left "", x)
 
-pipeParser :: Parser a -> Parser a -> Parser a
-pipeParser x x' = Parser $ \str -> let (e, str') = runParser x str
+orParser :: Parser a -> Parser a -> Parser a
+orParser x x' = Parser $ \str -> let (e, str') = runParser x str
   in case e of
     Left msg -> runParser x' str
     Right v -> (Right v, str')
