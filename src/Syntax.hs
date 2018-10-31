@@ -23,7 +23,7 @@ pStatisfy :: (Char -> Bool) -> Parser Char
 pStatisfy predicat = Parser func
   where
     func :: String -> (Either String Char, String)
-    func [] = (Left "Empty string", "")
+    func [] = (Left "Unexpected end of string", "")
     func (x:xs) = if (predicat x) then (Right x, xs) else (Left $ "Unsatisfied char: " ++ [x], x:xs)
 
 pNothing :: Parser (Maybe a)
