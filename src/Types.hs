@@ -4,7 +4,7 @@ module Types
   , ValueAst (..)
   ) where
 
-type ValueAst = Either Integer ExprAst
+type ValueAst = Either Float ExprAst
 
 data FuncAst = FuncAst
   { op :: Char

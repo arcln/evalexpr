@@ -49,8 +49,8 @@ pMany = many
 pCharOf :: String -> Parser Char
 pCharOf cs = pIgnoreChar ' ' $ pStatisfy $ \c -> elem c cs
 
-pDigit :: Parser Integer
-pDigit = toInteger . digitToInt <$> pCharOf ['0'..'9']
+pDigit :: Parser Char
+pDigit = pCharOf ['0'..'9']
 
 pString :: String -> Parser String
 pString [] = return []
@@ -59,10 +59,15 @@ pString (x:xs) = do
   xs' <- pString xs
   return (x':xs')
 
-pNumber :: Parser Integer
+pNumber :: Parser Float
 pNumber = do
   xs <- pSome pDigit
-  return (foldr (\x acc -> acc * 10 + x) 0 $ reverse xs)
+  dot <- pMaybe $ pChar '.'
+  xs' <- pMany pDigit
+  return $ read xs + case dot of
+    Just _ -> (read xs') / (10 ^ length xs')
+    Nothing -> 0.0
+  -- where number xs = foldr (\x acc -> acc * 10 + x) 0 $ reverse xs
 
 pStrongOp :: Parser Char
 pStrongOp = pChar '*' <|> pChar '/'
