@@ -1,23 +1,21 @@
 module Types
   ( FuncAst (..)
-  , PExprAst (..)
   , ExprAst (..)
+  , ValueAst (..)
   ) where
+
+type ValueAst = Either Integer ExprAst
 
 data FuncAst = FuncAst
   { op :: Char
-  , val :: ExprAst
-  }
+  , val :: ValueAst
+  } deriving (Show)
 
 data ExprAst = ExprAst
-  { head' :: Either Integer PExprAst
+  { unaryOp :: Maybe Char
+  , header :: ValueAst
   , funcs :: [FuncAst]
-  }
-
-data PExprAst = PExprAst
-  { sign :: Maybe Char
-  , expr :: ExprAst
-  }
+  } deriving (Show)
 
 -- let op          = exp('op', or(strongOp, weakOp));
 -- let value       = exp('value', and(maybe(weakOp), number));

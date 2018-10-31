@@ -8,19 +8,24 @@ module Syntax
   , pString
   , pNumber
   , pValue
+  , pEntry
+  , pFunc
+  , pExpr
+  , pPExpr
   ) where
 
 import Parser
 import Types
 import Control.Applicative
 import Data.Char
+import Data.Maybe
 
 pStatisfy :: (Char -> Bool) -> Parser Char
 pStatisfy predicat = Parser func
   where
     func :: String -> (Either String Char, String)
     func [] = (Left "Empty string", "")
-    func (x:xs) = if (predicat x) then (Right x, xs) else (Left "Unsatisfied char", x:xs)
+    func (x:xs) = if (predicat x) then (Right x, xs) else (Left $ "Unsatisfied char: " ++ [x], x:xs)
 
 pNothing :: Parser (Maybe a)
 pNothing = Parser func
@@ -31,11 +36,9 @@ pNothing = Parser func
 pChar :: Char -> Parser Char
 pChar c = pStatisfy (== c)
 
--- pOr :: Parser a -> Parser b -> Parser c
+-- pOr :: Parser a -> Parser b -> Parser (a, b)
 -- pOr x y = do
---   x' <- x
---   y' <- y
---   case y' of
+--   x <- pMany
 
 -- One or more
 pSome :: Parser a -> Parser [a]
@@ -82,33 +85,40 @@ pOp = pWeakOp <|> pStrongOp
 pMaybe :: Parser a -> Parser (Maybe a)
 pMaybe = optional
 
-pValue :: Parser Integer
+pValue :: Parser ValueAst
 pValue = do
-  sign <- pMaybe pWeakOp
-  num <- pNumber
-  case sign of
-    Just '-' -> return (- num)
-    Just '+' -> return num
-    Nothing -> pNumber
+  openBlock <- pMaybe pOpen
+  case openBlock of
+    Just '(' -> do
+      expr <- pExpr
+      _ <- pClose
+      return $ Right expr
+    _ -> do
+      nb <- pNumber
+      return $ Left nb
 
 pFunc :: Parser FuncAst
 pFunc = do
   op <- pOp
-  expr <- pExpr
-  return $ FuncAst op expr
+  val <- pValue
+  return $ FuncAst op val
 
 pExpr :: Parser ExprAst
 pExpr = do
-  header <- pOr pValue pPExpr
-  funcs <- pMany pFunc 
-  return $ ExprAst header funcs
-
-pPExpr :: Parser PExprAst
-pPExpr = do
   sign <- pMaybe pWeakOp
-  expr <- (pChar '(') *> pExpr (<* pChar ')')
-  return $ PExprAst sign expr
+  header <- pValue
+  funcs <- pMany pFunc
+  return $ ExprAst sign header funcs
 
+pPExpr :: Parser ExprAst
+pPExpr = do
+  expr <- pOpen *> pExpr <* pClose
+  return expr
+
+pEntry :: Parser ValueAst
+pEntry = do
+  expr <- pExpr
+  return $ Right expr
 
 -- let pexpr       = exp('pexpr');
 -- let expr        = exp('expr', and(or(value, pexpr), variadic(func)));
