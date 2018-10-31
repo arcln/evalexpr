@@ -11,7 +11,6 @@ module Syntax
   , pEntry
   , pFunc
   , pExpr
-  , pPExpr
   ) where
 
 import Parser
@@ -109,11 +108,6 @@ pExpr = do
   header <- pValue
   funcs <- pMany pFunc
   return $ ExprAst sign header funcs
-
-pPExpr :: Parser ExprAst
-pPExpr = do
-  expr <- pOpen *> pExpr <* pClose
-  return expr
 
 pEntry :: Parser ValueAst
 pEntry = do
