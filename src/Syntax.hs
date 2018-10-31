@@ -32,8 +32,11 @@ pNothing = Parser func
     func :: String -> (Either String (Maybe a), String)
     func xs = (Right Nothing, xs)
 
+pIgnoreChar :: Char -> Parser Char -> Parser Char
+pIgnoreChar c = (>>) $ pMany (pStatisfy (== c))
+
 pChar :: Char -> Parser Char
-pChar c = pStatisfy (== c)
+pChar c = pIgnoreChar ' ' $ pStatisfy (== c)
 
 -- One or more
 pSome :: Parser a -> Parser [a]
@@ -44,7 +47,7 @@ pMany :: Parser a -> Parser [a]
 pMany = many
 
 pCharOf :: String -> Parser Char
-pCharOf cs = pStatisfy $ \c -> elem c cs
+pCharOf cs = pIgnoreChar ' ' $ pStatisfy $ \c -> elem c cs
 
 pDigit :: Parser Integer
 pDigit = toInteger . digitToInt <$> pCharOf ['0'..'9']
