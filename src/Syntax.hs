@@ -58,9 +58,8 @@ pString (x:xs) = do
 
 pNumber :: Parser Integer
 pNumber = do
-  x <- pDigit
-  xs <- pNumber <|> pure 0
-  return (x + xs * 10)
+  xs <- pSome pDigit
+  return (foldr (\x acc -> acc * 10 + x) 0 $ reverse xs)
 
 pStrongOp :: Parser Char
 pStrongOp = pChar '*' <|> pChar '/'
@@ -99,11 +98,7 @@ pFunc = do
   return $ FuncAst op val
 
 pExpr :: Parser ExprAst
-pExpr = do
-  sign <- pMaybe pWeakOp
-  header <- pValue
-  funcs <- pMany pFunc
-  return $ ExprAst sign header funcs
+pExpr = ExprAst <$> (pMaybe pWeakOp) <*> pValue <*> (pMany pFunc)
 
 pEntry :: Parser ValueAst
 pEntry = do
