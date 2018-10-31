@@ -67,7 +67,6 @@ pNumber = do
   return $ read xs + case dot of
     Just _ -> (read xs') / (10 ^ length xs')
     Nothing -> 0.0
-  -- where number xs = foldr (\x acc -> acc * 10 + x) 0 $ reverse xs
 
 pStrongOp :: Parser Char
 pStrongOp = pChar '*' <|> pChar '/'
