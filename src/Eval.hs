@@ -11,6 +11,7 @@ applyFunc result func = case op func of
   '*' -> result * (evalExpr $ val func)
   '/' -> result / (evalExpr $ val func)
   '%' -> result `mod'` (evalExpr $ val func)
+  '^' -> result ** (evalExpr $ val func)
   _ -> 0
 
 applySign :: Maybe Char -> Float -> Float
