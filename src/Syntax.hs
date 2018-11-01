@@ -69,7 +69,7 @@ pNumber = do
     Nothing -> 0.0
 
 pStrongOp :: Parser Char
-pStrongOp = pChar '*' <|> pChar '/'
+pStrongOp = pChar '*' <|> pChar '/' <|> pChar '^'
 
 pWeakOp :: Parser Char
 pWeakOp = pChar '+' <|> pChar '-'
