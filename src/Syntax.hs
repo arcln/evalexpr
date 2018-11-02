@@ -59,14 +59,19 @@ pString (x:xs) = do
   xs' <- pString xs
   return (x':xs')
 
+pFloatingNumber :: Parser Float
+pFloatingNumber = do
+  dot <- pChar '.'
+  xs <- pSome pDigit
+  return $ (read xs) / (10 ^ length xs)
+
 pNumber :: Parser Float
 pNumber = do
   xs <- pSome pDigit
-  dot <- pMaybe $ pChar '.'
-  xs' <- pMany pDigit
-  return $ read xs + case dot of
-    Just _ -> (read xs') / (10 ^ length xs')
-    Nothing -> 0.0
+  floating <- pMaybe pFloatingNumber
+  return $ read xs + case floating of
+    Just f -> f
+    Nothing -> 0
 
 pStrongOp :: Parser Char
 pStrongOp = pChar '*' <|> pChar '/' <|> pChar '^'
