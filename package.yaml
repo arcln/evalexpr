@@ -6,9 +6,6 @@ author:              "Paul Laffitte"
 maintainer:          "paul.laffitte@epitech.eu"
 copyright:           "2018 Paul Laffitte"
 
-dependencies:
-- base >= 4.7 && < 5
-
 extra-source-files:
 - README.md
 
