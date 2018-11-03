@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+read expr
+result=$(./funEvalExpr "$expr")
+echo -n "${result%.*}"
