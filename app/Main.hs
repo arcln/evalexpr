@@ -6,8 +6,9 @@ import Text.Printf
 import System.Exit
 
 start :: [String] -> IO ()
-start args = do
-  case eval $ head args of
+start [] = putStrLn "usage: ./funEvalExpr '-(2+2)*3'" >>= (\_ -> exitWith $ ExitFailure 84)
+start (x:_) = do
+  case eval x of
     Left err -> putStrLn err >>= (\_ -> exitWith $ ExitFailure 84)
     Right result -> putStrLn $ showResult result
 
