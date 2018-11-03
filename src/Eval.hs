@@ -51,7 +51,7 @@ evalAst (Right expr) = case header res of
   Left val -> val
   Right exp -> evalAst $ header exp
   where
-    res = reduceFuncs '+' $ reduceFuncs '-' $ reduceFuncs '*' $ reduceFuncs '/' $ reduceFuncs '^' expr
+    res = foldr reduceFuncs expr ['^', '%', '/', '*', '-', '+']
 
 eval :: String -> Either String Float
 eval input = do

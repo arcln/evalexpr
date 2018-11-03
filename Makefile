@@ -27,4 +27,9 @@ re:		fclean all
 watch:
 	stack build --file-watch $(TARGET)
 
-.PHONY: all clean fclean re
+tests:
+	make re
+	cp $(NAME) moulinette
+	cd ./moulinette && ./tests-calc.py --file level1
+
+.PHONY: all clean fclean re watch tests
