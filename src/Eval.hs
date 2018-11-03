@@ -25,17 +25,18 @@ applySign sign val = case sign of
     Just '-' -> (- val)
     _ -> val
 
-processExprHead :: Maybe Char -> ValueAst -> Float
-processExprHead unaryOp (Left val) = applySign unaryOp val
-processExprHead unaryOp val@(Right expr) = applySign unaryOp $ evalAst val
+processExprHead :: ExprAst -> ExprAst
+processExprHead e@(ExprAst unaryOp (Left val) fs) = ExprAst Nothing (Left $ applySign unaryOp val) fs
+processExprHead e@(ExprAst unaryOp val@(Right _) fs) = ExprAst Nothing (Left $ applySign unaryOp $ evalAst val) fs
 
 reduceFuncs :: Char -> ExprAst -> ExprAst
 reduceFuncs sym e@(ExprAst u (Left _) []) = e
-reduceFuncs sym e@(ExprAst u h@(Right _) []) = ExprAst u (Left $ processExprHead u h) []
+reduceFuncs sym e@(ExprAst u h@(Right _) []) = processExprHead $ ExprAst u h []
 reduceFuncs sym e@(ExprAst u h (f@(FuncAst o _):fs))
-  | o == sym = reduceFuncs sym $ ExprAst u (Left $ applyFunc (Left $ processExprHead u h) f) fs
+  | o == sym = reduceFuncs sym $ ExprAst Nothing (Left $ applyFunc (header $ processExprHead expr') f) fs
   | otherwise = reduceFuncs' sym 1 e
   where
+    expr' = ExprAst u h []
     reduceFuncs' sym i e@(ExprAst u h fs)
       | i >= length fs = e
       | op g == sym = reduceFuncs' sym i $ ExprAst u h $ (replace fs i (FuncAst (op f) (Left $ applyFunc (val f) g)))
@@ -48,7 +49,7 @@ reduceFuncs sym e@(ExprAst u h (f@(FuncAst o _):fs))
 evalAst :: ValueAst -> Float
 evalAst (Left val) = val
 evalAst (Right expr) = case header res of
-  Left val -> val
+  Left val -> applySign (unaryOp res) val
   Right exp -> evalAst $ header exp
   where
     res = foldr reduceFuncs expr ['^', '%', '/', '*', '-', '+']
@@ -56,6 +57,8 @@ evalAst (Right expr) = case header res of
 eval :: String -> Either String Float
 eval input = do
   let expr = runParser pEntry input
-  case fst expr of
-    Right exp -> Right $ evalAst exp
-    Left err -> Left err
+  if length (snd expr) /= 0
+    then Left $ "Unexpected token: " ++ (snd expr)
+    else case fst expr of
+      Right exp -> Right $ evalAst exp
+      Left err -> Left err
