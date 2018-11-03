@@ -10,11 +10,10 @@ start :: [String] -> IO ()
 start [] = hPutStrLn stderr "usage: ./funEvalExpr '-(2+2)*3'" >>= (\_ -> exitWith $ ExitFailure 84)
 start (x:_) = do
   case eval x of
-    Left err -> hPutStrLn stderr err >>= (\_ -> exitWith $ ExitFailure 84)
+    Left err -> hPutStrLn stderr err >>= \_ -> exitWith $ ExitFailure 84
     Right r -> if isInfinite r
-      then printResult r >>= (\_ -> exitWith $ ExitFailure 84)
-      else printResult r
-    where printResult r = hPutStrLn stderr $ showResult r
+      then (hPutStrLn stderr $ showResult r) >>= \_ -> exitWith $ ExitFailure 84
+      else putStrLn $ showResult r
 
 showResult :: Float -> String
 showResult r
