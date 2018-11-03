@@ -10,7 +10,10 @@ start [] = putStrLn "usage: ./funEvalExpr '-(2+2)*3'" >>= (\_ -> exitWith $ Exit
 start (x:_) = do
   case eval x of
     Left err -> putStrLn err >>= (\_ -> exitWith $ ExitFailure 84)
-    Right result -> putStrLn $ showResult result
+    Right r -> if isInfinite r
+      then printResult r >>= (\_ -> exitWith $ ExitFailure 84)
+      else printResult r
+    where printResult r = putStrLn $ showResult r
 
 showResult :: (PrintfArg a, Floating a) => a -> String
 showResult = printf "%0.*f" (2 :: Int)
