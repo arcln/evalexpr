@@ -19,12 +19,15 @@ import Control.Applicative
 import Data.Char
 import Data.Maybe
 
-pStatisfy :: (Char -> Bool) -> Parser Char
-pStatisfy predicat = Parser func
+pStatisfy' :: (Char -> Bool) -> Parser Char
+pStatisfy' predicat = Parser func
   where
     func :: String -> (Either String Char, String)
     func [] = (Left "Unexpected end of string", "")
     func (x:xs) = if (predicat x) then (Right x, xs) else (Left $ "Unsatisfied char: " ++ [x], x:xs)
+
+pStatisfy :: (Char -> Bool) -> Parser Char
+pStatisfy x = pIgnoreChar ' ' $ pStatisfy' x
 
 pNothing :: Parser (Maybe a)
 pNothing = Parser func
@@ -33,10 +36,11 @@ pNothing = Parser func
     func xs = (Right Nothing, xs)
 
 pIgnoreChar :: Char -> Parser Char -> Parser Char
-pIgnoreChar c = (>>) $ pMany (pStatisfy (== c))
+pIgnoreChar c p = ignoreMany *> p <* ignoreMany
+  where ignoreMany = pMany (pStatisfy' (== c))
 
 pChar :: Char -> Parser Char
-pChar c = pIgnoreChar ' ' $ pStatisfy (== c)
+pChar c = pStatisfy (== c)
 
 -- One or more
 pSome :: Parser a -> Parser [a]
@@ -47,7 +51,7 @@ pMany :: Parser a -> Parser [a]
 pMany = many
 
 pCharOf :: String -> Parser Char
-pCharOf cs = pIgnoreChar ' ' $ pStatisfy $ \c -> elem c cs
+pCharOf cs = pStatisfy $ \c -> elem c cs
 
 pDigit :: Parser Char
 pDigit = pCharOf ['0'..'9']
