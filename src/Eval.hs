@@ -52,7 +52,7 @@ evalAst (Right expr) = case header res of
   Left val -> applySign (unaryOp res) val
   Right exp -> evalAst $ header exp
   where
-    res = foldr reduceFuncs expr ['^', '%', '/', '*', '-', '+']
+    res = foldr reduceFuncs expr ['+', '-', '*', '/', '%', '^']
 
 eval :: String -> Either String Float
 eval input = do
