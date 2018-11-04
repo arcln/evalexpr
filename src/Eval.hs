@@ -10,13 +10,16 @@ replace xs i x = (take (i - 1) xs) ++ [x] ++ (drop (i + 1) xs)
 
 applyFunc :: ValueAst -> FuncAst -> Float
 applyFunc result func = case op func of
-  '+' -> (evalAst result) + (evalAst $ val func)
-  '-' -> (evalAst result) - (evalAst $ val func)
-  '*' -> (evalAst result) * (evalAst $ val func)
-  '/' -> (evalAst result) / (evalAst $ val func)
-  '%' -> (evalAst result) `mod'` (evalAst $ val func)
-  '^' -> (evalAst result) ** (evalAst $ val func)
+  '+' -> r + l
+  '-' -> r - l
+  '*' -> r * l
+  '/' -> r / l
+  '%' -> if l /= 0 then r `mod'` l else r / l
+  '^' -> r ** l
   _ -> 0
+  where
+    r = (evalAst result)
+    l = (evalAst $ val func)
 
 applySign :: Maybe Char -> Float -> Float
 applySign sign val = case sign of
